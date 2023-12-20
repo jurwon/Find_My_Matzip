@@ -126,12 +126,12 @@
             // insertRow(-1); = 테이블 젤 위에 행이 생성이 됨
             // insertRow(0); = 테이블 젤 아래에 행이 생성이 됨
             const newRow = table.insertRow(0);
-
             const cell1 = newRow.insertCell(0);
             const cell2 = newRow.insertCell(1);
             const cell3 = newRow.insertCell(2);
             const cell4 = newRow.insertCell(3);
 
+            newRow.style.paddingLeft = `${comment.parentId * 20}px`
 
             cell1.innerHTML = comment.commentWriter;
             cell2.innerHTML = comment.commentContents;
@@ -249,6 +249,16 @@
         }
 
         .box_margin {
+            margin: 10px;
+        }
+        .comment_img{
+            display: flex;
+            align-items: center; /* 세로 중앙 정렬 */
+            width: 50px;
+            height: 50px;
+            border-radius: 70%;
+            overflow: hidden;
+            background: #1F5D5E;
             margin: 10px;
         }
     </style>
@@ -426,6 +436,7 @@
                         <th>내용</th>
                         <th>수정</th>
                         <th>삭제</th>
+                        <th>댓글</th>
                     </tr>
                     </thead>
                     <tbody id="comment-list">
@@ -446,16 +457,25 @@
                                class="btn btn-danger delete-comment"
                                data-comment-id="${comment.commentId}"
                                onclick="return confirmDelete()">삭제</a>
+                        </td>
+                        <td>
                             <!-- 대댓글 폼 -->
-
-                            <p class="reviewer"><span>작성자</span> : <span id="replyForm-${comment.commentId}" th:text="${loggedInUser.userid}"></span>
-                            <p>Comment ID: <span th:text="${comment.commentId}"></span></p>
-                            <!--                                <textarea id="replyContents-${comment.commentId}-${someUniqueValue}" placeholder="답글을 작성하세요"></textarea>-->
-                            <textarea class="form-control" id="replyContents-${comment.commentId}"rows="3" placeholder="대댓글을 작성하세요"></textarea>
+                            <div id="comment-list2" style="display: flex; align-items: center;">
+                                <div class="comment_img">
+                                    <img th:src="${users.user_image}" alt="profile_img">
+                                </div>
+                                <div class="comment_user"  th:text="${loggedInUser.userid}"></div>
+                            </div>
+                            <!--                                        <p>Comment ID: <span th:text="${comment.commentId}"></span></p>-->
+                            <textarea class="form-control" style="margin-bottom: 10px" id="replyContents-${comment.commentId}"rows="3" placeholder="대댓글을 작성하세요"></textarea>
                             <button th:onclick="submitReply(/*[[${comment.commentId}]]*/ + '${comment.commentId}')">대댓글</button>
+                            <!-- 대댓글이 추가될 위치 -->
+                            <!--                            <div class="reply-container" th:id="'replyContainer-' + ${comment.commentId}"></div>-->
 
 
                         </td>
+
+
                     </tr>
                     </tbody>
                 </table>

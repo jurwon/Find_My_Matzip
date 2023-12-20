@@ -29,13 +29,7 @@ public class CommentController {
     // 반환된 댓글 정보는 클라이언트에게 JSON 형태로 전달
     @PostMapping("/comment/save")
     public ResponseEntity<?> save(@RequestBody CommentDto commentDto) {
-        // CommentDto를 생성하고 값 설정
-//        CommentDto commentDto = new CommentDto();
-//        commentDto.setCommentWriter(commentWriter);
-//        commentDto.setCommentContents(commentContents);
-//        commentDto.setBoardId(board);
         Long saveResult = commentService.save(commentDto);
-
         if (saveResult != null) {
             CommentDto savedComment = commentService.findById(saveResult);
             return new ResponseEntity<>(savedComment, HttpStatus.OK);
@@ -44,17 +38,10 @@ public class CommentController {
         }
     }
 
-
     @PostMapping("/comment/saveReply/{parentId}")
     public ResponseEntity<?> saveReply(@RequestBody CommentDto commentDto, @PathVariable Long parentId) {
         System.out.println("saveReply parentId==================================: " + parentId);
         System.out.println("saveReply parentId: " + parentId);
-//    CommentDto commentDtoList = new CommentDto();
-//    commentDtoList.setCommentId(commentDto.getCommentId());
-//    commentDtoList.setBoardId(commentDto.getBoardId());
-//    commentDtoList.setCommentWriter(commentDto.getCommentWriter());
-//    commentDtoList.setCommentContents(commentDto.getCommentContents());
-//    commentDtoList.setParentId(parentId); // 부모 댓글의 ID를 설정
         Long commentId = commentService.saveReply(commentDto); // 부모 댓글 ID를 가진 대댓글을 저장
         System.out.println("saveReply commentId: " + commentId);
         System.out.println("saveReply parentId: " + parentId);
