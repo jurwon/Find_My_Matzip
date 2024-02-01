@@ -1,4 +1,4 @@
-# <img src="https://github.com/jurwon/Find_My_Matzip_Android/assets/35756071/b319291f-ec97-419b-949f-c6a7e3834c32" width="50" height="50"/> 맛.ZIP (위치기반 부산 맛집 공유 커뮤니티 웹)
+# <img src="https://github.com/jurwon/Find_My_Matzip_Android/assets/35756071/b319291f-ec97-419b-949f-c6a7e3834c32" width="50" height="50"/> 맛.ZIP (부산 맛집 공유 커뮤니티 웹)
 ![image](https://github.com/jurwon/Find_My_Matzip/assets/35756071/a608c43c-2d40-46c2-809b-c2da4864f5c2)
 - 일정 : 2023.10.02. ~ 2023.10.18 <br><br>
 
@@ -6,7 +6,6 @@
 - 넘쳐나는 광고성 맛집 정보에 지친 사람들을 위한 신뢰 기반 부산 맛집 공유 SNS입니다.
 - 개인의 프로필 페이지에 나의 맛집에 대한 정보를 작성할 수 있습니다.
 - 내 근처 맛집 정보를 지도에 띄워 제공합니다.
-- 검색을 통해 다른 유저들의 맛집 정보와 식당상세 정보를 찾아볼 수 있습니다.
 - 다양한 유저들을 팔로우하며 마음에 드는 게시글에 좋아요를 누르거나 댓글을 작성 할 수 있습니다.
 <br><br>
 
