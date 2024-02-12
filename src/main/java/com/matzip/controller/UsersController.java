@@ -239,7 +239,7 @@ public class UsersController {
         return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/insertFollow/{toUserId}")
+    @PostMapping("/insertFollow/{toUserId}")
     /*@PostMapping("/insertFollow/")*/
     public @ResponseBody ResponseEntity<Map<String, Object>> insertFollow(@PathVariable String toUserId, Principal principal) {
         System.out.println("팔로우 하기전 ");
@@ -247,7 +247,7 @@ public class UsersController {
         System.out.println("팔로우 하기후 ");
         System.out.println("toUserId 확인: " + toUserId);
         System.out.println("HttpStatus.OK 확인: " + HttpStatus.OK);
-        FollowDto followDto = new FollowDto("a", "b", "c");
+        //FollowDto followDto = new FollowDto("a", "b", "c");
         Map<String, Object> result = new HashMap<>();
         result.put("data", toUserId);
         return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
