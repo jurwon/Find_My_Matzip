@@ -12,10 +12,10 @@
     <script th:inline="javascript">
 
         /*<![CDATA[*/
-        var userName = /*[[${loginUserDto.userid}]]*/ 'defaultUserName';
+        var userName = /*[[${loggedInUser.userid}]]*/ 'defaultUserName';
         console.log('userName:', userName);
 
-        const commentWrite = () => {
+        const commentWrite = (parentId) => {
             const contents = document.getElementById("commentContents").value;
             const id = [[${board.id}]];
             const token = $("meta[name='_csrf']").attr("content");
@@ -24,7 +24,8 @@
             console.log("Data to be sent:", {
                 "commentWriter": userName,
                 "commentContents": contents,
-                "board": id
+                "board": id,
+                "parentId": parentId,
             });
 
             $.ajax({
@@ -34,7 +35,8 @@
                 data: JSON.stringify({
                     "commentWriter": userName,
                     "commentContents": contents,
-                    "boardId": id
+                    "boardId": id,
+                    "parentId": parentId,
                 }),
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader(header, token);
@@ -55,7 +57,69 @@
                 }
             });
         }
+        // 대댓글 제출 함수
+        // submitReply 함수 정의
+        function submitReply(commentId) {
+            console.log('submitReply 함수 호출됨, commentId:', commentId);
+            const contents = document.getElementById("replyContents-${comment.commentId}").value;
+            const id = [[${board.id}]]; // 게시판 ID
+            const token = $("meta[name='_csrf']").attr("content"); // CSRF 토큰
+            const header = $("meta[name='_csrf_header']").attr("content"); // CSRF 헤더
 
+            console.log('submitReply 함수 호출됨');
+            console.log("보냇다 대댓글:", {
+                "commentWriter": userName, // 댓글 작성자
+                "commentContents": contents, // 댓글 내용
+                "boardId": id, // 게시판 ID
+                // "parentId": commentId // 부모 댓글 ID
+                "parentId": commentId // 부모 댓글 ID
+
+            });
+            // commentId가 유효한 숫자인지 확인
+            if (!isNaN(commentId)) {
+                // fetchParentId 함수 호출
+                // fetchParentId(6, function(updatedParentId) {
+                // 업데이트된 부모 댓글 ID가 있을 경우
+                if (true) {
+                    // AJAX를 사용하여 대댓글 저장 요청
+                    $.ajax({
+                        type: "post",
+                        url: `/comment/saveReply/${commentId}`, // 수정된 부분
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            "commentWriter": userName, // 댓글 작성자
+                            "commentContents": contents, // 댓글 내용
+                            "boardId": id, // 게시판 ID
+                            "parentId": commentId, // 업데이트된 부모 댓글 ID
+                        }),
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        success: function (res) {
+                            // 테이블에 새로운 댓글 추가
+                            addCommentToTable(res);
+                            $(`#replyForm-${commentId}`).hide();
+                            $(`#replyContents-${commentId}`).val('');
+                            // 대댓글이 성공적으로 작성되면 메시지를 추가
+                            const successMessage = "댓글이 성공적으로 작성되었습니다!";
+                            alert(successMessage);
+
+                        },
+                        error: function (err) {
+                            console.log("요청실패", err);
+                            if (err.status === 401) {
+                                alert('로그인이 필요합니다.');
+                            }
+                        }
+                    });
+                } else {
+                    console.error('부모 댓글 ID를 가져올 수 없습니다.');
+                }
+                // });
+            } else {
+                console.error('commentId가 유효한 숫자가 아닙니다:', commentId);
+            }
+        }
         //리뷰 테이블 한 행씩 추가하기위한 스크립트
         const addCommentToTable = (comment) => {
             const table = document.getElementById('comment-list');
@@ -71,8 +135,8 @@
 
             cell1.innerHTML = comment.commentWriter;
             cell2.innerHTML = comment.commentContents;
-            cell3.innerHTML = `<a href="/comment/edit/${comment.id}">수정</a>`;
-            cell4.innerHTML = `<a href="/comment/delete/${comment.id}" class="btn btn-danger">삭제</a>`;
+            cell3.innerHTML = `<a href="/comment/edit/${comment.commentId}">수정</a>`;
+            cell4.innerHTML = `<a href="/comment/delete/${comment.commentId}" class="btn btn-danger">삭제</a>`;
         };
 
         function confirmDelete() {
@@ -187,6 +251,16 @@
         .box_margin {
             margin: 10px;
         }
+        .comment_img{
+            display: flex;
+            align-items: center; /* 세로 중앙 정렬 */
+            width: 50px;
+            height: 50px;
+            border-radius: 70%;
+            overflow: hidden;
+            background: #1F5D5E;
+            margin: 10px;
+        }
     </style>
 </th:block>
 
@@ -241,7 +315,7 @@
 
                             <th:block th:switch="*{users.userid}">
                                 <!--내가 쓴 글-->
-                                <div th:case="${loginUserDto.getUserid()}">
+                                <div th:case="${loggedInUser.getUserid()}">
                                     <button type="button" onClick="" class="btn btn-secondary">👍 <span th:text="${likeCount}"></span></button>
                                     <button type="button" onClick="" class="btn btn-secondary">👎 <span th:text="${dislikeCount}"></span></button>
                                 </div>
@@ -345,13 +419,12 @@
             <h4>댓글</h4>
             <div>
                 <div id="comment-write">
-                    <p class="reviewer"><span>작성자</span> : <span th:text="${loginUserDto.userid}"></span></p>
+                    <p class="reviewer"><span>작성자</span> : <span th:text="${loggedInUser.userid}"></span></p>
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Review</span>
                         </div>
-                        <textarea class="form-control" aria-label="With textarea" id="commentContents"
-                                  placeholder="리뷰를 적어 주세요."></textarea>
+                        <textarea class="form-control" aria-label="With textarea" id="commentContents" placeholder="리뷰를 적어 주세요."></textarea>
                     </div>
                     <button id="comment-write-btn" onclick="commentWrite()" class="btn btn-dark">댓글작성</button>
                 </div>
@@ -361,26 +434,44 @@
                     <tr>
                         <th>작성자</th>
                         <th>내용</th>
-                        <th>작업</th>
-                        <th>작업</th>
+                        <th>수정</th>
+                        <th>삭제</th>
                     </tr>
                     </thead>
                     <tbody id="comment-list">
                     <tr th:each="comment : ${commentsPage.content}">
+                        <input type="hidden" th:id="'commentId-' + ${comment.commentId}" th:value="${comment.commentId}"/>
                         <td th:text="${comment.commentWriter}"></td>
                         <td th:text="${comment.commentContents}"></td>
                         <td>
-                            <!--로그인을 한 유저, 로그인을 한 유저의 name 과 commentWriter가 일치하면 수정버튼 활성화-->
-                            <a th:if="${users != null and comment.commentWriter == loginUserDto.userid}"
-                               th:href="@{/comment/edit/{commentId}(commentId=${comment.id})}">수정</a>
+                            <!--                            <input type="text" id="commentId2" th:value="${comment.commentId}"/>-->
+                            <!-- 로그인을 한 유저, 로그인을 한 유저의 name 과 commentWriter가 일치하면 수정버튼 활성화 -->
+                            <a th:if="${users != null and comment.commentWriter == loggedInUser.userid}"
+                               th:href="@{/comment/edit/{commentId}(commentId=${comment.commentId})}">수정</a>
                         </td>
                         <td>
-                            <!-- 로그인한 사용자와 댓글 작성자가 일치하면 삭제 버튼 표시 -->
-                            <a th:if="${users != null and comment.commentWriter == loginUserDto.userid}"
-                               th:href="@{/comment/delete/{commentId}(commentId=${comment.id})}"
+
+                            <a th:if="${users != null and comment.commentWriter == loggedInUser.userid}"
+                               th:href="@{/comment/delete/{commentId}(commentId=${comment.commentId})}"
                                class="btn btn-danger delete-comment"
-                               data-comment-id="${comment.id}"
+                               data-comment-id="${comment.commentId}"
                                onclick="return confirmDelete()">삭제</a>
+                        <td>
+                            <!-- 대댓글 폼 -->
+                            <div id="comment-list2" style="display: flex; align-items: center;">
+                                <div class="comment_img">
+                                    <img th:src="${users.user_image}" alt="profile_img">
+                                </div>
+                                <div class="comment_user"  th:text="${loggedInUser.userid}"></div>
+                            </div>
+                            <!--                                        <p>Comment ID: <span th:text="${comment.commentId}"></span></p>-->
+                            <textarea class="form-control" style="margin-bottom: 10px" id="replyContents-${comment.commentId}"rows="3" placeholder="대댓글을 작성하세요"></textarea>
+                            <button th:onclick="submitReply(/*[[${comment.commentId}]]*/ + '${comment.commentId}')">대댓글</button>
+                            <!-- 대댓글이 추가될 위치 -->
+                            <!--                            <div class="reply-container" th:id="'replyContainer-' + ${comment.commentId}"></div>-->
+
+
+                        </td>
 
                         </td>
                     </tr>
